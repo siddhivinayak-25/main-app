@@ -1,4 +1,4 @@
--- HireOS Database Schema
+-- HireOS Database Schema v2
 -- Agentic Hiring Intelligence Platform
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -27,8 +27,11 @@ CREATE TABLE IF NOT EXISTS tests (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name          VARCHAR(255) NOT NULL,
   role          VARCHAR(255),
-  status        VARCHAR(50)  DEFAULT 'draft', -- draft | active | closed
+  status        VARCHAR(50)  DEFAULT 'draft',
   instructions  TEXT,
+  language      VARCHAR(50)  DEFAULT 'python',
+  time_limit    INTEGER      DEFAULT 90,   -- minutes
+  starter_code  TEXT,
   recruiter_id  UUID REFERENCES users(id) ON DELETE CASCADE,
   created_at    TIMESTAMPTZ  DEFAULT NOW(),
   updated_at    TIMESTAMPTZ  DEFAULT NOW()
@@ -41,6 +44,8 @@ CREATE TABLE IF NOT EXISTS test_cases (
   name            VARCHAR(255) NOT NULL,
   input           TEXT,
   expected_output TEXT,
+  is_hidden       BOOLEAN     DEFAULT false,
+  weight          NUMERIC     DEFAULT 1.0,
   created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -53,12 +58,10 @@ CREATE TABLE IF NOT EXISTS candidates (
   role            VARCHAR(255),
   score           INTEGER CHECK (score >= 0 AND score <= 100),
   status          VARCHAR(50)  DEFAULT 'invited',
-  -- invited | in_progress | completed | reviewed | hired | rejected
   last_activity   TIMESTAMPTZ  DEFAULT NOW(),
   score_breakdown JSONB        DEFAULT '{}',
-  -- { promptQuality, errorRecovery, outputCorrectness, codeQuality, executionEfficiency }
   test_details    JSONB        DEFAULT '{}',
-  -- { testTaken, executionTime, language, environment }
+  security_flags  JSONB        DEFAULT '[]',  -- array of security incidents
   created_at      TIMESTAMPTZ  DEFAULT NOW(),
   updated_at      TIMESTAMPTZ  DEFAULT NOW()
 );
@@ -80,33 +83,60 @@ CREATE TABLE IF NOT EXISTS invitations (
   candidate_email  VARCHAR(255) NOT NULL,
   candidate_name   VARCHAR(255) NOT NULL,
   invitation_token UUID UNIQUE  DEFAULT gen_random_uuid(),
-  status           VARCHAR(50)  DEFAULT 'pending', -- pending | accepted | completed | expired
+  status           VARCHAR(50)  DEFAULT 'pending',
   invited_at       TIMESTAMPTZ  DEFAULT NOW(),
   submitted_at     TIMESTAMPTZ,
   expires_at       TIMESTAMPTZ  DEFAULT (NOW() + INTERVAL '7 days')
 );
 
--- ─── Evaluation Sessions (LangGraph Engine) ───────────────────────────────
+-- ─── Evaluation Sessions ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS evaluation_sessions (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   candidate_id      UUID REFERENCES candidates(id) ON DELETE CASCADE,
   test_id           UUID REFERENCES tests(id) ON DELETE CASCADE,
   invitation_id     UUID REFERENCES invitations(id) ON DELETE SET NULL,
-  status            VARCHAR(50)  DEFAULT 'active', -- active | completed | failed
+  status            VARCHAR(50)  DEFAULT 'active',
   started_at        TIMESTAMPTZ  DEFAULT NOW(),
   completed_at      TIMESTAMPTZ,
   telemetry         JSONB        DEFAULT '[]',
-  -- Array of { type, timestamp, payload } events from the candidate's session
+  sandbox_files     JSONB        DEFAULT '{}',  -- { filename: content }
   evaluation_result JSONB        DEFAULT '{}',
-  -- LangGraph output: { scores, feedback, reasoning, compositeScore }
+  provider_results  JSONB        DEFAULT '{}',  -- per-provider scores for audit
+  rubric_version    VARCHAR(20)  DEFAULT '1.0.0',
   created_at        TIMESTAMPTZ  DEFAULT NOW()
 );
 
+-- ─── Security Events ───────────────────────────────────────────────────────
+-- Every biometric / integrity event logged independently for full audit trail
+CREATE TABLE IF NOT EXISTS security_events (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id   UUID REFERENCES evaluation_sessions(id) ON DELETE CASCADE,
+  candidate_id UUID REFERENCES candidates(id) ON DELETE CASCADE,
+  event_type   VARCHAR(100) NOT NULL,
+  -- FACE_NOT_DETECTED | MULTIPLE_FACES | TAB_SWITCH | WINDOW_BLUR
+  -- COPY_PASTE | RIGHT_CLICK_BLOCKED | DEVTOOLS_OPEN | SCREEN_SHARE_DETECTED
+  -- FOCUS_LOST | BIOMETRIC_ANOMALY | CAMERA_DISABLED | SESSION_STARTED
+  severity     VARCHAR(20)  DEFAULT 'info',  -- info | warning | critical
+  payload      JSONB        DEFAULT '{}',
+  ts           TIMESTAMPTZ  DEFAULT NOW()
+);
+
+-- ─── Sandbox Files (per-session virtual filesystem snapshots) ─────────────
+CREATE TABLE IF NOT EXISTS sandbox_snapshots (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id   UUID REFERENCES evaluation_sessions(id) ON DELETE CASCADE,
+  files        JSONB        DEFAULT '{}',  -- { filename: { content, language } }
+  snapshot_at  TIMESTAMPTZ  DEFAULT NOW()
+);
+
 -- ─── Indexes ───────────────────────────────────────────────────────────────
-CREATE INDEX IF NOT EXISTS idx_tests_recruiter      ON tests(recruiter_id);
-CREATE INDEX IF NOT EXISTS idx_candidates_test      ON candidates(test_id);
-CREATE INDEX IF NOT EXISTS idx_candidates_status    ON candidates(status);
-CREATE INDEX IF NOT EXISTS idx_invitations_token    ON invitations(invitation_token);
-CREATE INDEX IF NOT EXISTS idx_invitations_test     ON invitations(test_id);
-CREATE INDEX IF NOT EXISTS idx_eval_sessions_cand   ON evaluation_sessions(candidate_id);
-CREATE INDEX IF NOT EXISTS idx_activity_log_cand    ON candidate_activity_log(candidate_id);
+CREATE INDEX IF NOT EXISTS idx_tests_recruiter       ON tests(recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_candidates_test       ON candidates(test_id);
+CREATE INDEX IF NOT EXISTS idx_candidates_status     ON candidates(status);
+CREATE INDEX IF NOT EXISTS idx_invitations_token     ON invitations(invitation_token);
+CREATE INDEX IF NOT EXISTS idx_invitations_test      ON invitations(test_id);
+CREATE INDEX IF NOT EXISTS idx_eval_sessions_cand    ON evaluation_sessions(candidate_id);
+CREATE INDEX IF NOT EXISTS idx_activity_log_cand     ON candidate_activity_log(candidate_id);
+CREATE INDEX IF NOT EXISTS idx_security_events_sess  ON security_events(session_id);
+CREATE INDEX IF NOT EXISTS idx_security_events_cand  ON security_events(candidate_id);
+CREATE INDEX IF NOT EXISTS idx_security_events_type  ON security_events(event_type);

@@ -12,23 +12,23 @@ import TestDetail from './pages/TestDetail';
 import CandidatePipeline from './pages/CandidatePipeline';
 import ComingSoon from './pages/ComingSoon';
 import Profile from './pages/Profile';
-import CandidateTestPage from './pages/CandidateTestPage';
+import CandidateWorkspace from './pages/CandidateWorkspace';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Candidate Public Test Shell (standalone) */}
-        <Route path="/test/:testId" element={<CandidateTestPage />} />
+        {/* ── Candidate Test Workspace (public, invite-token gated) ── */}
+        <Route path="/test/:testId" element={<CandidateWorkspace />} />
 
-        {/* Public group */}
+        {/* ── Public ── */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Route>
 
-        {/* Protected group */}
+        {/* ── Protected recruiter dashboard ── */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<AppLayout />}>
             <Route index element={<CommandCenter />} />
@@ -45,4 +45,4 @@ export default function App() {
       </Routes>
     </BrowserRouter>
   );
-}
+}
