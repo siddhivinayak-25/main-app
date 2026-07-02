@@ -1,46 +1,25 @@
-import { request } from './client';
-import {
-  dashboardStats,
-  hiringFunnel,
-  recentActiveTests,
-  topCandidates,
-  candidates,
-  CANDIDATE_STAGES,
-  REJECTED_STAGE,
-} from '../data/mockData';
+import { get } from './client.js';
 
-export const getDashboardStats = () =>
-  request(() => {
-    return dashboardStats.map((stat) => {
-      if (stat.label === 'Hires') {
-        return {
-          ...stat,
-          value: candidates.filter((c) => c.status === 'Hired').length,
-        };
-      }
-      if (stat.label === 'Candidates') {
-        return {
-          ...stat,
-          value: candidates.length,
-        };
-      }
-      return stat;
-    });
-  });
+export async function getDashboardStats() {
+  const data = await get('/dashboard/stats');
+  return data.stats;
+}
 
-export const getHiringFunnel = () => request(() => hiringFunnel);
-export const getRecentActiveTests = () => request(() => recentActiveTests);
-export const getTopCandidates = () => request(() => topCandidates);
+export async function getHiringFunnel() {
+  const data = await get('/dashboard/pipeline');
+  return data.pipeline; // [{ stage, count }]
+}
 
-export const getPipelineStats = () =>
-  request(() => {
-    const stages = [...CANDIDATE_STAGES, REJECTED_STAGE];
-    return stages.map((stage) => {
-      const key = stage.toLowerCase() === 'in progress' ? 'inProgress' : stage.toLowerCase();
-      return {
-        key,
-        label: stage,
-        count: candidates.filter((c) => c.status === stage).length,
-      };
-    });
-  });
+export async function getPipelineStats() {
+  return getHiringFunnel();
+}
+
+export async function getRecentActiveTests() {
+  const data = await get('/dashboard/recent-tests');
+  return data.tests; // [{ id, name, completed }]
+}
+
+export async function getTopCandidates() {
+  const data = await get('/dashboard/top-candidates');
+  return data.candidates; // [{ id, name, score }]
+}

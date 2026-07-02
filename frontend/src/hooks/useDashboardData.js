@@ -4,7 +4,10 @@ import { getDashboardStats, getHiringFunnel, getRecentActiveTests, getTopCandida
 export function useDashboardData() {
   return useAsync(async () => {
     const [stats, funnel, recentTests, topCandidates] = await Promise.all([
-      getDashboardStats(), getHiringFunnel(), getRecentActiveTests(), getTopCandidates(),
+      getDashboardStats(),
+      getHiringFunnel(),
+      getRecentActiveTests(),
+      getTopCandidates(),
     ]);
     return { stats, funnel, recentTests, topCandidates };
   }, []);

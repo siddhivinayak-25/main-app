@@ -1,51 +1,31 @@
-import { request } from './client';
-import { mockUser } from '../data/mockData';
+import { get, post, setToken } from './client.js';
 
-export const login = ({ email, password }) =>
-  request(() => {
-    if (email === mockUser.email && password === mockUser.password) {
-      const { password: _, ...userWithoutPassword } = mockUser;
-      return {
-        user: userWithoutPassword,
-        token: 'mock-jwt-' + Date.now(),
-      };
-    }
-    throw new Error('Invalid email or password');
-  });
+export async function login({ email, password }) {
+  const data = await post('/auth/login', { email, password });
+  setToken(data.token);
+  return data; // { user, token }
+}
 
-export const signup = ({ name, email, password }) =>
-  request(() => {
-    const initials = name
-      ? name
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase()
-          .slice(0, 2)
-      : 'U';
-    const newUser = {
-      id: Date.now(),
-      name,
-      email,
-      role: 'Recruiter',
-      avatarInitials: initials,
-    };
-    return {
-      user: newUser,
-      token: 'mock-jwt-' + Date.now(),
-    };
-  });
+export async function signup({ name, email, password }) {
+  const data = await post('/auth/signup', { name, email, password });
+  setToken(data.token);
+  return data; // { user, token }
+}
 
-export const logout = () => Promise.resolve();
+export async function logout() {
+  try {
+    await post('/auth/logout');
+  } finally {
+    setToken(null);
+  }
+}
 
-export const loginWithProvider = (provider) =>
-  request(async () => {
-    // real OAuth popups take time, add ~250ms extra delay on top of client's 350ms
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    const { password: _, ...userWithoutPassword } = mockUser;
-    return {
-      user: userWithoutPassword,
-      token: `mock-jwt-${provider}-${Date.now()}`,
-    };
-  });
+export async function loginWithProvider(provider) {
+  // OAuth providers — placeholder until OAuth flow is implemented
+  throw new Error(`${provider} OAuth not yet configured. Use email/password login.`);
+}
 
+export async function getMe() {
+  const data = await get('/auth/me');
+  return data.user;
+}

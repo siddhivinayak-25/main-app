@@ -1,0 +1,385 @@
+First — Understand What You're Actually Building
+HackerRank/LeetCode test: "Write a function that reverses a linked list."
+→ Candidate writes code → it runs → tests pass or fail → done.
+Your platform test: "Build an agentic workflow that takes a user question, searches the web, summarizes results using an LLM, and handles errors gracefully."
+→ Candidate thinks with AI → prompts a model → reviews generated code → accepts/modifies → executes → observes agent behavior → iterates → done.
+These are completely different evaluation paradigms. You're not testing "can you code" — you're testing "can you think and build with AI agents" — which is the most valuable skill in 2026 and nobody has a platform that evaluates it properly yet.
+
+The Mental Model: What Is The Sandbox Really?
+┌─────────────────────────────────────────────────────────────────┐
+│                 THE AGENTIC EVALUATION SANDBOX                  │
+│                                                                 │
+│   It's not a code runner.                                       │
+│   It's not a chat interface.                                    │
+│   It's a complete, isolated, observable mini-computer           │
+│   where a candidate thinks, prompts, builds, runs, and          │
+│   iterates — and every single action is recorded,               │
+│   timestamped, and scored.                                      │
+└─────────────────────────────────────────────────────────────────┘
+Think of it as three interlocked systems:
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│   WORKSPACE      │    │   EXECUTION      │    │   EVALUATION     │
+│                  │    │   ENGINE         │    │   ENGINE         │
+│  File tree       │◄──►│                  │◄──►│                  │
+│  Code editor     │    │  Docker sandbox  │    │  Agentic scorer  │
+│  Model selector  │    │  Terminal        │    │  Session replay  │
+│  Prompt input    │    │  Process mgr     │    │  Score breakdown │
+│  Diff viewer     │    │  Network proxy   │    │  Feedback gen    │
+└──────────────────┘    └──────────────────┘    └──────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌────────────▼───────────┐
+                    │    SESSION RECORDER    │
+                    │                        │
+                    │  Every keystroke       │
+                    │  Every prompt sent     │
+                    │  Every model response  │
+                    │  Every execution       │
+                    │  Every file change     │
+                    │  Timeline of events    │
+                    └────────────────────────┘
+
+The Architecture — Layer By Layer
+Layer 1: The Workspace (Frontend)
+This is what the candidate sees. Not a simple code editor. A full IDE-like environment:
+┌─────────────────────────────────────────────────────────────────┐
+│  HEADER: Test Name | Timer ⏱ 01:34:18 | [Submit Test]          │
+├────────────┬─────────────────────────┬───────────────────────── ┤
+│            │                         │                          │
+│  FILE TREE │    CODE WORKSPACE       │   RIGHT PANEL            │
+│            │                         │                          │
+│  📁 src/   │  main.py    agent.py    │  [Problem] [Console]     │
+│   main.py  │  ┌─────────────────┐   │  [Tests]  [AI History]   │
+│   agent.py │  │ from langgraph  │   │                          │
+│   utils.py │  │ import ...      │   │  ● Test Case 1  Passed   │
+│            │  │                 │   │  ● Test Case 2  Passed   │
+│  📁 tests/ │  │ class State...  │   │  ● Test Case 3  Running  │
+│   test1.py │  │                 │   │                          │
+│            │  └─────────────────┘   │  TERMINAL OUTPUT         │
+│            │                         │  ┌────────────────────┐  │
+│  AI PANEL  │  ┌─MODEL SELECT──────┐  │  │ $ python main.py   │  │
+│            │  │ ○ Claude Sonnet   │  │  │ > Running agent... │  │
+│  Prompt:   │  │ ● GPT-4o         │  │  │ > Tool called:     │  │
+│  ┌───────┐ │  │ ○ Gemini Pro     │  │  │   search("query")  │  │
+│  │ Build │ │  └───────────────────┘  │  │ > Result: {...}    │  │
+│  │ an    │ │                         │  └────────────────────┘  │
+│  │ agent │ │  [Generate] [Accept]    │                          │
+│  │ that  │ │  [Reject]  [Modify]     │                          │
+│  └───────┘ │                         │                          │
+│  [Send ▶]  │  [▶ Run]  [▶▶ Run All] │                          │
+└────────────┴─────────────────────────┴──────────────────────────┘
+Key interactions (not in HackerRank):
+
+Model selector — candidate chooses which AI to work with
+Prompt input → model generates code → candidate sees diff → Accept/Reject/Modify
+Every Accept/Reject/Modify is a scored event
+Terminal is real (WebSocket to a real process in their container)
+File tree is real (actual files in their container)
+
+
+Layer 2: The Container Architecture
+This is the hardest part to get right. Each candidate gets their own isolated environment:
+┌─────────────────────────────────────────────────────────────────┐
+│                    ORCHESTRATION LAYER                          │
+│              (Kubernetes or AWS ECS per test type)              │
+└──────┬──────────────────┬──────────────────┬────────────────────┘
+       │                  │                  │
+┌──────▼──────┐   ┌───────▼──────┐  ┌───────▼──────┐
+│  CANDIDATE  │   │  CANDIDATE   │  │  CANDIDATE   │
+│  POD A      │   │  POD B       │  │  POD C       │
+│             │   │              │  │              │
+│ Python 3.11 │   │ Go 1.22      │  │ TypeScript   │
+│ langgraph   │   │ langchain-go │  │ langchain.js │
+│ tools pre-  │   │              │  │              │
+│ installed   │   │              │  │              │
+│             │   │              │  │              │
+│ Memory: 2GB │   │ Memory: 2GB  │  │ Memory: 2GB  │
+│ CPU: 1 core │   │ CPU: 1 core  │  │ CPU: 1 core  │
+│ Network:    │   │ Network:     │  │ Network:     │
+│ proxied     │   │ proxied      │  │ proxied      │
+│ Time: 90min │   │ Time: 60min  │  │ Time: 60min  │
+└─────────────┘   └──────────────┘  └──────────────┘
+What's inside each container (not just a bare Linux box):
+dockerfileFROM python:3.11-slim AS base
+
+# Pre-install the tools candidates will use
+RUN pip install langgraph langchain anthropic openai \
+    httpx pytest black ruff
+
+# Pre-configured mock tools (search, calculator, etc.)
+# So candidates don't need API keys — the tools are wired
+# to controlled mock services that the test defines
+COPY ./mock_tools/ /app/tools/
+
+# Starter code from test config
+COPY ./starter_code/ /app/
+
+# A small HTTP server that accepts code execution requests
+# and streams stdout/stderr back over WebSocket
+COPY ./execution_server.py /app/
+
+# Resource limits enforced at container level
+# (not just ulimit — actual cgroup limits)
+CMD ["python", "/app/execution_server.py"]
+Why "Network: proxied" is critical:
+
+You don't want candidates calling real OpenAI/Anthropic in their code (cost, unpredictability)
+Instead: your platform intercepts all outbound API calls via a proxy
+This proxy logs every model call (prompt sent, response received)
+This is how you evaluate "Prompt Quality" — you literally see the prompts
+
+Candidate's code calls: openai.chat.completions.create(...)
+                              ↓
+              Your Proxy intercepts this call
+                              ↓
+              Logs: { prompt, model, timestamp, candidateId }
+                              ↓
+              Forwards to real OpenAI (with YOUR API key)
+                              ↓
+              Returns response to candidate's code
+                              ↓
+              Logs: { response, tokens_used, latency }
+This is your real scoring data. Not just "did the code work" but "how did they prompt the model" — which is exactly what HackerRank cannot see.
+
+Layer 3: The Session Recorder
+Every action in the sandbox gets streamed to a time-series event log:
+javascript// Every event has this shape
+{
+  sessionId: 'sess_abc123',
+  candidateId: 'cand_xyz',
+  testId: 'test_1',
+  timestamp: 1717500000000,   // milliseconds, for replay ordering
+  eventType: 'PROMPT_SENT',   // see all types below
+  payload: {
+    prompt: 'Build a search agent that...',
+    model: 'claude-sonnet-4-6',
+    file: 'main.py'
+  }
+}
+
+// Event types you track:
+PROMPT_SENT          // candidate sent a prompt to a model
+MODEL_RESPONSE       // model returned code/text
+CODE_ACCEPTED        // candidate clicked Accept on generated code
+CODE_REJECTED        // candidate clicked Reject
+CODE_MODIFIED        // candidate edited generated code before accepting
+FILE_SAVED           // any file save
+CODE_EXECUTED        // candidate hit Run
+EXECUTION_OUTPUT     // stdout/stderr came back
+TEST_CASE_RESULT     // a test case passed or failed
+TERMINAL_COMMAND     // candidate typed in terminal
+ERROR_ENCOUNTERED    // runtime error occurred
+ERROR_RECOVERED      // they fixed it and re-ran
+SESSION_SUBMITTED    // candidate clicked Submit
+Why this matters: After submission, you can replay the entire session like a video. The recruiter sees not just the final code, but:
+
+First prompt at 00:02:14
+Rejected the first response
+Second prompt refined at 00:08:45
+Accepted, ran code, got an error
+Fixed it themselves (didn't re-prompt) — that's Error Recovery: 9/10
+
+
+Layer 4: The Agentic Scorer
+This is your actual moat. After submission, this system reads the entire event log and produces a structured evaluation. It's not one LLM call — it's a multi-agent pipeline:
+                    SUBMISSION ARRIVES
+                           │
+              ┌────────────▼────────────┐
+              │    ORCHESTRATOR         │
+              │    (decides which       │
+              │    evaluator agents     │
+              │    to run)              │
+              └────────────┬────────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+┌───────▼──────┐  ┌────────▼──────┐  ┌───────▼──────┐
+│ PROMPT       │  │ ERROR         │  │ CODE         │
+│ QUALITY      │  │ RECOVERY      │  │ QUALITY      │
+│ AGENT        │  │ AGENT         │  │ AGENT        │
+│              │  │               │  │              │
+│ Reads all    │  │ Reads all     │  │ Reads final  │
+│ PROMPT_SENT  │  │ ERROR_        │  │ code files   │
+│ events       │  │ ENCOUNTERED + │  │              │
+│              │  │ RECOVERED     │  │ Evaluates:   │
+│ Evaluates:   │  │ events        │  │ structure,   │
+│ clarity,     │  │               │  │ readability, │
+│ specificity, │  │ Evaluates:    │  │ efficiency,  │
+│ iteration    │  │ how fast,     │  │ patterns     │
+│ quality      │  │ how smart     │  │              │
+│              │  │ the recovery  │  │              │
+└───────┬──────┘  └────────┬──────┘  └───────┬──────┘
+        │                  │                  │
+        └──────────────────┼──────────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │   SYNTHESIS AGENT       │
+              │                         │
+              │  Combines all sub-      │
+              │  scores, applies        │
+              │  weights from test      │
+              │  config, writes         │
+              │  human-readable         │
+              │  feedback for each      │
+              │  criterion              │
+              └────────────┬────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │   FINAL SCORE OBJECT    │
+              │                         │
+              │  {                      │
+              │    total: 87,           │
+              │    breakdown: {         │
+              │      promptQuality:     │
+              │        score: 9,        │
+              │        feedback: "...", │
+              │      errorRecovery:     │
+              │        score: 8,        │
+              │        feedback: "..."  │
+              │    },                   │
+              │    highlights: [...],   │
+              │    concerns: [...]      │
+              │  }                      │
+              └─────────────────────────┘
+What each agent's prompt actually looks like:
+PROMPT QUALITY AGENT:
+
+You are evaluating a software engineering candidate's ability
+to effectively prompt AI models during an agentic coding test.
+
+Here are all the prompts they sent during the test session,
+in chronological order:
+
+[PROMPT 1 - 00:02:14]
+"write a langgraph agent"
+
+[PROMPT 2 - 00:08:45] (after rejecting the first response)
+"write a langgraph agent that takes a user question as input,
+uses a DuckDuckGo search tool to find relevant information,
+summarizes the results using Claude, and handles cases where
+the search returns no results by asking the user to rephrase"
+
+[PROMPT 3 - 00:24:11] (after an error in execution)
+"the agent is failing when the search tool returns an empty
+list. add error handling for this specific case and add a
+retry mechanism with exponential backoff"
+
+Evaluate these prompts across:
+1. Specificity and clarity (were they vague or precise?)
+2. Iteration quality (did prompts improve after failures?)
+3. Context inclusion (did they include error messages, expected behavior?)
+4. Decomposition (did they break complex tasks into clear sub-goals?)
+
+Return a score from 1-10 and 2-3 sentences of specific feedback.
+Format as JSON: { "score": N, "feedback": "..." }
+
+Layer 5: Different Tests, Different Sandboxes
+This is the strategic layer most people miss. Not all tests are the same type:
+TEST TYPE A: Pure Agentic Workflow
+├─ Environment: Python + LangGraph + mock tools
+├─ Scoring: Heavy on Prompt Quality, Tool Usage, Agent Design
+├─ Sandbox: Full tool access (search, calculator, file reader)
+└─ Example: "Build a research agent"
+
+TEST TYPE B: Code + AI Collaboration  
+├─ Environment: TypeScript + LLM SDK + real codebase
+├─ Scoring: Heavy on Code Quality, Debugging skill
+├─ Sandbox: Pre-existing broken codebase to fix
+└─ Example: "Debug this AI pipeline and improve its accuracy"
+
+TEST TYPE C: System Design + Prompting
+├─ Environment: No code execution — document-based
+├─ Scoring: Heavy on architecture thinking, prompt design
+├─ Sandbox: Document editor + AI assistant
+└─ Example: "Design a multi-agent customer support system"
+
+TEST TYPE D: Data + AI
+├─ Environment: Python + Jupyter-style notebook
+├─ Scoring: Heavy on data reasoning, prompt engineering
+├─ Sandbox: Pre-loaded dataset + model access
+└─ Example: "Build a pipeline that classifies customer intent"
+Each test type maps to a different Docker image, a different set of available tools, a different scoring rubric for the Agentic Scorer — but the same frontend workspace, the same session recorder, the same score display on the recruiter side.
+
+Build Strategy — Milestones in Strict Order
+Milestone 1 — The Dumbest Possible Version That Works
+Goal: One candidate, one test type, code runs, score computed, recruiter sees it.
+Single Docker image (Python only)
+No model selector (Claude only)
+No file tree (single file, main.py)
+No session recording
+Fake scoring (rule-based, not LLM)
+No Kubernetes (single server, one container at a time)
+Why: proves the loop before you build the sophistication.
+Milestone 2 — Real Scoring
+Goal: Replace fake scoring with real LLM evaluation.
+Prompt Quality Agent (first and most impactful)
+Session recorder (need the data to evaluate)
+Store events in PostgreSQL
+Score stored in DB, retrieved by recruiter
+Why: this is your moat. Deploy it the moment it works.
+Milestone 3 — Real Sandbox
+Goal: Multiple concurrent candidates, safe isolation.
+Kubernetes (AWS EKS or GKE)
+One pod per candidate
+Resource limits enforced
+Network proxy for API call logging
+Container lifecycle management (spin up on invite, destroy after submit)
+Why: before this milestone, you can only demo to one person at a time.
+Milestone 4 — Multiple Test Types
+Goal: Support TypeScript + Go sandboxes, Notebook type.
+Docker image registry (separate image per language)
+Test type configuration in DB
+Scoring rubric per test type
+Model selector (GPT-4o, Claude, Gemini)
+Why: opens up your total addressable market beyond Python AI engineers.
+Milestone 5 — Session Replay
+Goal: Recruiter watches the full session like a video.
+Event timeline visualization
+Step-through replay (go to any point in time)
+See every prompt, every response, every execution
+This is your killer demo feature
+Why: no competitor has this. It's how you close enterprise deals.
+
+The Technologies You Need to Actually Learn (ordered)
+Week 1-2: Container fundamentals
+
+Docker (build, run, volumes, networking)
+Docker Compose (local multi-container development)
+Linux process isolation (why containers are safe)
+Resource limits (cgroups, memory/CPU caps)
+
+Week 3-4: Backend execution layer
+
+WebSocket protocol (bidirectional, low-latency — terminal streams need this)
+Node.js child_process / exec (how to run code from a server)
+Stream handling (stdout/stderr as streams, not buffered)
+Process timeouts and killing zombie processes
+
+Week 5-6: Orchestration
+
+Kubernetes fundamentals (pods, services, deployments)
+AWS EKS or Google GKE (managed Kubernetes)
+Container registry (ECR or GCR — where your Docker images live)
+Horizontal pod autoscaling (scale sandbox count based on demand)
+
+Week 7-8: Agentic evaluation
+
+Anthropic Claude API (messages, system prompts, structured outputs)
+Prompt engineering for evaluation (how to get consistent JSON scores)
+LangGraph or similar (understand what candidates will be building)
+Multi-agent orchestration (your scoring pipeline is itself a multi-agent system)
+
+Week 9+: Production hardening
+
+Network security (VPC, security groups, no candidate can talk to another)
+Secrets management (AWS Secrets Manager — API keys never in code)
+Observability (logs → CloudWatch, errors → Sentry, metrics → Datadog)
+Load testing (what happens when 100 candidates submit simultaneously)
+
+
+The One Thing That Separates You From Everyone
+HackerRank sees: code input → test output. Pass or fail.
+You see: every thought the candidate had while building. Every prompt. Every rejection. Every recovery. Every iteration. Every decision.
+That's not a code evaluator. That's an intelligence evaluator.
+And when a recruiter asks "why did you score Aarav a 92?" — you can show them: "He sent 3 prompts. The first was vague. He rejected it. The second included the error context and expected behavior. He accepted, ran it, hit an edge case, fixed it himself without re-prompting. His error recovery is what pushed him to 92."

@@ -1,33 +1,26 @@
-import { request } from './client';
-import { tests, candidates } from '../data/mockData';
+import { get, post, patch } from './client.js';
 
-export const getTests = () => request(() => tests);
+export async function getTests() {
+  const data = await get('/tests');
+  return data.tests;
+}
 
-export const getTestById = (id) =>
-  request(() => tests.find((t) => t.id === Number(id)));
+export async function getTestById(id) {
+  const data = await get(`/tests/${id}`);
+  return data.test;
+}
 
-export const getCandidatesByTestId = (id) =>
-  request(() => candidates.filter((c) => c.testId === Number(id)));
+export async function getCandidatesByTestId(id) {
+  const data = await get(`/tests/${id}/candidates`);
+  return data.candidates;
+}
 
-export const createTest = (formData) =>
-  request(() => {
-    const now = new Date();
-    const createdOn = now.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+export async function createTest(formData) {
+  const data = await post('/tests', formData);
+  return data.test;
+}
 
-    const newTest = {
-      id: tests.length ? Math.max(...tests.map((t) => t.id)) + 1 : 1,
-      name: formData.testTitle || 'Untitled Test',
-      role: formData.role || '',
-      candidates: 0,
-      progress: 0,
-      status: 'Live',
-      createdOn,
-    };
-
-    tests.unshift(newTest);
-    return newTest;
-  });
+export async function updateTest(id, updates) {
+  const data = await patch(`/tests/${id}`, updates);
+  return data.test;
+}

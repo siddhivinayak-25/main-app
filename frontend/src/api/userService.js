@@ -1,29 +1,15 @@
-import { request } from './client';
-import { mockUser } from '../data/mockData';
+import { get, patch, post } from './client.js';
 
-// GET /api/me — returns the current user's profile (without password)
-export const getCurrentUser = () =>
-  request(() => {
-    const { password: _, ...profile } = mockUser;
-    return profile;
-  });
+export async function getCurrentUser() {
+  const data = await get('/users/me');
+  return data.user;
+}
 
-// PATCH /api/me — merges updates into the user profile
-// Mutating the module-level mockUser is the seam that becomes a real
-// PATCH /api/me call later — the contract stays the same.
-export const updateProfile = (updates) =>
-  request(() => {
-    Object.assign(mockUser, updates);
-    const { password: _, ...profile } = mockUser;
-    return profile;
-  });
+export async function updateProfile(updates) {
+  const data = await patch('/users/me', updates);
+  return data.user;
+}
 
-// POST /api/me/password — validates current, sets new
-export const updatePassword = ({ currentPassword, newPassword }) =>
-  request(() => {
-    if (currentPassword !== mockUser.password) {
-      throw new Error('Current password is incorrect');
-    }
-    mockUser.password = newPassword;
-    return { success: true };
-  });
+export async function updatePassword({ currentPassword, newPassword }) {
+  return post('/users/me/password', { currentPassword, newPassword });
+}
