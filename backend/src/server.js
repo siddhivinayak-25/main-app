@@ -88,8 +88,10 @@ async function bootstrap() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`✓ HireOS API running on port ${PORT}`);
-    if (!process.env.OPENAI_API_KEY) {
-      console.warn('⚠  OPENAI_API_KEY not set — LangGraph evaluation will not score candidates');
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn('⚠  GEMINI_API_KEY not set — LangGraph evaluation will not score candidates');
+    } else {
+      console.log('✓ Gemini Flash LLM ready for evaluation engine');
     }
   });
 }
