@@ -50,7 +50,7 @@ function getLLM() {
     throw new Error('GEMINI_API_KEY not set');
   }
   return new ChatGoogleGenerativeAI({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     apiKey: process.env.GEMINI_API_KEY,
     temperature: 0.2,
     maxOutputTokens: 1024,

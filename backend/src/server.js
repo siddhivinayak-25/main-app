@@ -91,7 +91,7 @@ async function bootstrap() {
     if (!process.env.GEMINI_API_KEY) {
       console.warn('⚠  GEMINI_API_KEY not set — LangGraph evaluation will not score candidates');
     } else {
-      console.log('✓ Gemini Flash LLM ready for evaluation engine');
+      console.log('✓ Gemini 2.5 Flash LLM ready for evaluation engine');
     }
   });
 }
