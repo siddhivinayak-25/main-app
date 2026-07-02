@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Light canvas */
+  --color-surface: #F7F5FC;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-card: #FFFFFF;
+  --color-surface-border: #E7E2F5;
+  --color-surface-hover: #F1ECFB;
+
+  /* Dark purple sidebar — the "purple-dark" half of the theme */
+  --color-sidebar: #1B1130;
+  --color-sidebar-hover: #2A1B47;
+
+  /* Primary accent, run through badges/buttons/scores/active states */
+  --color-brand-violet: #7C3AED;
+  --color-brand-violet-dark: #4C1D95;
+  --color-brand-violet-light: #EDE9FE;
+
+  /* Text */
+  --color-ink: #1E1B2E;
+  --color-muted: #6B6478;
+
+  /* Fonts */
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Sora', sans-serif;
+
+  --shadow-glow: 0 0 0 1px rgba(124, 58, 237, 0.15), 0 8px 24px -8px rgba(124, 58, 237, 0.35);
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-ink font-sans antialiased;
+  }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E7E2F5; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #D6CDF0; }
+
+@keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.animate-slide-in { animation: slide-in 0.25s ease-out; }
+.animate-fade-in { animation: fade-in 0.2s ease-out; }
