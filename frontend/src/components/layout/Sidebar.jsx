@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, Workflow, ClipboardList, Users, BarChart3, Settings } from 'lucide-react';
+import { LayoutGrid, Workflow, ClipboardList, Users, BarChart3, Settings, Mail } from 'lucide-react';
 
 const navItems = [
-  { to: '/dashboard', label: 'Command Center', icon: LayoutGrid, end: true },
-  { to: '/dashboard/pipeline', label: 'Pipeline', icon: Workflow },
-  { to: '/dashboard/tests', label: 'Tests', icon: ClipboardList },
-  { to: '/dashboard/candidates', label: 'Candidates', icon: Users },
-  { to: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/dashboard/settings', label: 'Settings', icon: Settings },
+  { to: '/dashboard',             label: 'Command Center', icon: LayoutGrid, end: true },
+  { to: '/dashboard/pipeline',    label: 'Pipeline',       icon: Workflow },
+  { to: '/dashboard/tests',       label: 'Tests',          icon: ClipboardList },
+  { to: '/dashboard/invitations', label: 'Invitations',    icon: Mail },
+  { to: '/dashboard/candidates',  label: 'Candidates',     icon: Users },
+  { to: '/dashboard/analytics',   label: 'Analytics',      icon: BarChart3 },
+  { to: '/dashboard/settings',    label: 'Settings',       icon: Settings },
 ];
 
 export default function Sidebar() {

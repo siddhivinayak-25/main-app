@@ -129,6 +129,22 @@ CREATE TABLE IF NOT EXISTS sandbox_snapshots (
   snapshot_at  TIMESTAMPTZ  DEFAULT NOW()
 );
 
+-- ─── Idempotent migrations (safe to run every boot) ──────────────────────
+-- Add columns introduced after initial table creation
+ALTER TABLE tests ADD COLUMN IF NOT EXISTS language     VARCHAR(50)  DEFAULT 'python';
+ALTER TABLE tests ADD COLUMN IF NOT EXISTS time_limit   INTEGER      DEFAULT 90;
+ALTER TABLE tests ADD COLUMN IF NOT EXISTS starter_code TEXT;
+ALTER TABLE tests ADD COLUMN IF NOT EXISTS updated_at   TIMESTAMPTZ  DEFAULT NOW();
+
+ALTER TABLE test_cases ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN DEFAULT false;
+ALTER TABLE test_cases ADD COLUMN IF NOT EXISTS weight    NUMERIC DEFAULT 1.0;
+
+ALTER TABLE evaluation_sessions ADD COLUMN IF NOT EXISTS sandbox_files   JSONB DEFAULT '{}';
+ALTER TABLE evaluation_sessions ADD COLUMN IF NOT EXISTS provider_results JSONB DEFAULT '{}';
+ALTER TABLE evaluation_sessions ADD COLUMN IF NOT EXISTS rubric_version   VARCHAR(20) DEFAULT '1.0';
+
+ALTER TABLE candidates ADD COLUMN IF NOT EXISTS security_flags JSONB DEFAULT '{}';
+
 -- ─── Indexes ───────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_tests_recruiter       ON tests(recruiter_id);
 CREATE INDEX IF NOT EXISTS idx_candidates_test       ON candidates(test_id);
