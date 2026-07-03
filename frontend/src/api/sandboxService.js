@@ -1,63 +1,90 @@
-import { apiFetch } from './client.js';
+const BASE = '/api';
 
-const headers = (token) => ({ 'x-invitation-token': token });
+// Sandbox calls use invitation token (not JWT) for auth
+async function sandboxFetch(path, options = {}) {
+  const res = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+  let data;
+  try { data = await res.json(); } catch { data = {}; }
+  if (!res.ok) {
+    const err = new Error(data.error || `Request failed (${res.status})`);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+// Authenticated fetch using stored JWT (for session submission)
+async function authFetch(path, options = {}) {
+  let token = null;
+  try { const a = localStorage.getItem('auth'); if (a) token = JSON.parse(a).token; } catch {}
+  const res = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+  });
+  let data;
+  try { data = await res.json(); } catch { data = {}; }
+  if (!res.ok) {
+    const err = new Error(data.error || `Request failed (${res.status})`);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+const h = (token) => ({ 'x-invitation-token': token });
 
 export const sandboxService = {
-  /** Get all files in the session workspace */
   getFiles: (token) =>
-    apiFetch('/sandbox/files', { headers: headers(token) }),
+    sandboxFetch('/sandbox/files', { headers: h(token) }),
 
-  /** Save / update a file */
   saveFile: (token, filename, content) =>
-    apiFetch('/sandbox/files', {
-      method: 'POST',
-      headers: headers(token),
+    sandboxFetch('/sandbox/files', {
+      method: 'POST', headers: h(token),
       body: JSON.stringify({ filename, content }),
     }),
 
-  /** Execute code via Piston */
   run: (token, { code, language, stdin }) =>
-    apiFetch('/sandbox/run', {
-      method: 'POST',
-      headers: headers(token),
+    sandboxFetch('/sandbox/run', {
+      method: 'POST', headers: h(token),
       body: JSON.stringify({ code, language, stdin }),
     }),
 
-  /** Run all visible test cases */
   runTests: (token, { code, language }) =>
-    apiFetch('/sandbox/test', {
-      method: 'POST',
-      headers: headers(token),
+    sandboxFetch('/sandbox/test', {
+      method: 'POST', headers: h(token),
       body: JSON.stringify({ code, language }),
     }),
 
-  /** Send a prompt to Gemini, get generated code back */
   aiPrompt: (token, { prompt, currentCode, language, action, context }) =>
-    apiFetch('/sandbox/ai', {
-      method: 'POST',
-      headers: headers(token),
+    sandboxFetch('/sandbox/ai', {
+      method: 'POST', headers: h(token),
       body: JSON.stringify({ prompt, currentCode, language, action, context }),
     }),
 
-  /** Log Accept / Reject / Modify decision */
   logAiAction: (token, action, filename) =>
-    apiFetch('/sandbox/ai-action', {
-      method: 'POST',
-      headers: headers(token),
+    sandboxFetch('/sandbox/ai-action', {
+      method: 'POST', headers: h(token),
       body: JSON.stringify({ action, filename }),
     }),
 
-  /** Autosave snapshot of all files */
   snapshot: (token, files) =>
-    apiFetch('/sandbox/snapshot', {
-      method: 'POST',
-      headers: headers(token),
+    sandboxFetch('/sandbox/snapshot', {
+      method: 'POST', headers: h(token),
       body: JSON.stringify({ files }),
     }),
 
-  /** Submit the test */
-  submit: ({ sessionId, candidateId, testId, files, invitationId }) =>
-    apiFetch(`/evaluation/sessions/${sessionId}/submit`, {
+  submit: ({ sessionId, candidateId, testId, files }) =>
+    authFetch(`/evaluation/sessions/${sessionId}/submit`, {
       method: 'POST',
       body: JSON.stringify({
         candidateId, testId, files,
@@ -65,10 +92,10 @@ export const sandboxService = {
       }),
     }),
 
-  /** Log security event via REST (WebSocket fallback) */
   logSecurityEvent: ({ sessionId, candidateId, eventType, payload }) =>
-    apiFetch('/security/event', {
+    fetch(`${BASE}/security/event`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId, candidateId, eventType, payload }),
-    }).catch(() => {}), // fire-and-forget, never throw
+    }).catch(() => {}),
 };

@@ -22,7 +22,7 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 
 import { useTestInvitation } from '../hooks/useTestInvitation.js';
 import { sandboxService }    from '../api/sandboxService.js';
-import { apiFetch }          from '../api/client.js';
+import { post }              from '../api/client.js';
 
 import WorkspaceHeader  from '../components/workspace/WorkspaceHeader.jsx';
 import FileTree         from '../components/workspace/FileTree.jsx';
@@ -53,10 +53,7 @@ function defaultFilename(lang) {
 // ─── Session bootstrap ────────────────────────────────────────────────────
 
 async function startSession(candidateId, testId, invitationId) {
-  const res = await apiFetch('/evaluation/sessions', {
-    method: 'POST',
-    body: JSON.stringify({ candidateId, testId, invitationId }),
-  });
+  const res = await post('/evaluation/sessions', { candidateId, testId, invitationId });
   return res.sessionId;
 }
 
