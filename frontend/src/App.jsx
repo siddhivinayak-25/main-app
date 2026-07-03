@@ -13,6 +13,7 @@ import CandidatePipeline from './pages/CandidatePipeline';
 import ComingSoon from './pages/ComingSoon';
 import Profile from './pages/Profile';
 import CandidateWorkspace from './pages/CandidateWorkspace';
+import InvitationsDashboard from './pages/InvitationsDashboard';
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="tests" element={<ActiveTests />} />
             <Route path="tests/new" element={<CreateTest />} />
             <Route path="tests/:testId" element={<TestDetail />} />
+            <Route path="invitations" element={<InvitationsDashboard />} />
             <Route path="candidates" element={<ComingSoon title="Candidates" />} />
             <Route path="analytics" element={<ComingSoon title="Analytics" />} />
             <Route path="settings" element={<ComingSoon title="Settings" />} />

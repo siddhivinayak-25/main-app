@@ -15,6 +15,11 @@ const INITIAL_FORM_DATA = {
   durationUnit: 'minutes',
   skills: [],
   difficulty: '',
+  // Step 2 — TestConfigurationStep
+  instructions: '',
+  language: 'python',
+  starterCode: '',
+  testCases: [],
 };
 
 export default function CreateTest() {
