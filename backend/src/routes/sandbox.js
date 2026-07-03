@@ -67,6 +67,10 @@ router.post('/files', validateToken, async (req, res, next) => {
   try {
     const { filename, content } = req.body;
     if (!filename) return res.status(400).json({ error: 'filename required' });
+    // Sanitize filename — prevent path traversal / JSONB key injection
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(filename)) {
+      return res.status(400).json({ error: 'Invalid filename. Use alphanumeric, dots, dashes, underscores only.' });
+    }
 
     const { session_id } = req.invitation;
     if (!session_id) return res.status(400).json({ error: 'No active session' });

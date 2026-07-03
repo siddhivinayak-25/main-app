@@ -226,26 +226,32 @@ export function attachWebSocketServer(httpServer) {
 
     if (!sessionId) { ws.close(4000, 'sessionId required'); return; }
 
-    // Validate token → invitation
+    // Validate token → invitation (REQUIRED — close if missing or invalid)
+    if (!token) { ws.close(4001, 'Invitation token required'); return; }
+
     let testCases = [];
+    let invitationValid = false;
     try {
       const inv = await query(
-        `SELECT i.id, i.candidate_id, t.language,
+        `SELECT i.id, i.candidate_id, i.status, t.language,
                 json_agg(json_build_object('name',tc.name,'input',tc.input,'expectedOutput',tc.expected_output))
                   FILTER (WHERE tc.id IS NOT NULL AND tc.is_hidden = false) AS test_cases
          FROM invitations i
          JOIN tests t ON t.id = i.test_id
          LEFT JOIN test_cases tc ON tc.test_id = t.id
-         WHERE i.invitation_token = $1
-         GROUP BY i.id, t.language`,
+         WHERE i.invitation_token = $1 AND i.status != 'expired'
+         GROUP BY i.id, i.candidate_id, i.status, t.language`,
         [token]
       );
       if (inv.rows.length) {
+        invitationValid = true;
         testCases = inv.rows[0].test_cases || [];
         const lang = inv.rows[0].language || 'python';
         getOrCreateSession(sessionId, lang);
       }
-    } catch { /* non-blocking */ }
+    } catch { /* db error — treated as invalid */ }
+
+    if (!invitationValid) { ws.close(4003, 'Invalid or expired invitation token'); return; }
 
     const sessionState = getOrCreateSession(sessionId);
 
