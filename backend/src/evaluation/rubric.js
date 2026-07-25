@@ -1,5 +1,5 @@
 /**
- * HireOS Scoring Rubric — Ethical Parameter Registry
+ * hiresprint Scoring Rubric — Ethical Parameter Registry
  *
  * EVERY numerical parameter in the evaluation system is declared here.
  * This is the single source of truth for all scoring bounds, weights,

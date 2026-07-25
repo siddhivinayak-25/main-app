@@ -86,7 +86,7 @@ async function bootstrap() {
   attachWebSocketServer(httpServer);
 
   httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`✓ HireOS API running on port ${PORT}`);
+    console.log(`✓ hiresprint API running on port ${PORT}`);
     if (!process.env.GEMINI_API_KEY) {
       console.warn('⚠  GEMINI_API_KEY not set — AI features disabled');
     } else {

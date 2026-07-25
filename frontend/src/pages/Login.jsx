@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import SocialAuthButtons from '../components/auth/SocialAuthButtons';
-
+import BrandLogo from '../components/brand/BrandLogo';
+import TopographicBackground from '../components/visual/TopographicBackground';
+import GradientMesh from '../components/visual/GradientMesh';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -37,17 +39,17 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden">
+      <TopographicBackground className="z-0" density="dense" />
+      <GradientMesh className="z-0" intensity="medium" />
+
       {/* Logo */}
-      <Link to="/" className="flex items-center gap-2 mb-8 group">
-        <div className="w-9 h-9 rounded-lg bg-brand-violet flex items-center justify-center text-white shadow-glow transition-transform group-hover:scale-105">
-          <Sparkles size={18} />
-        </div>
-        <span className="text-2xl font-display font-bold text-ink">HireOS</span>
-      </Link>
+      <div className="relative z-10 mb-8">
+        <BrandLogo to="/" size="lg" variant="dark" />
+      </div>
 
       {/* Card */}
-      <div className="w-full max-w-md bg-surface-card border border-surface-border rounded-2xl p-8 shadow-sm">
+      <div className="relative z-10 w-full max-w-md card-elevated p-8">
         <div className="mb-6 text-center">
           <h2 className="text-xl font-display font-semibold text-ink">Welcome back</h2>
           <p className="text-sm text-muted mt-1">Sign in to manage your hiring evaluations</p>
@@ -72,7 +74,7 @@ export default function Login() {
             <div className="w-full border-t border-surface-border"></div>
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-surface-card px-3 text-muted">or continue with email</span>
+            <span className="bg-surface-raised px-3 text-muted">or continue with email</span>
           </div>
         </div>
 
@@ -88,7 +90,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               disabled={inFlight}
-              className="w-full bg-surface border border-surface-border rounded-lg px-3.5 py-2 text-sm placeholder:text-muted focus:outline-none focus:border-brand-violet focus:ring-1 focus:ring-brand-violet transition-all"
+              className="w-full bg-surface border border-surface-border rounded-lg px-3.5 py-2 text-sm placeholder:text-muted focus:outline-none focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/10 transition-all"
               required
             />
           </div>
@@ -104,11 +106,12 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 disabled={inFlight}
-                className="w-full bg-surface border border-surface-border rounded-lg pl-3.5 pr-10 py-2 text-sm placeholder:text-muted focus:outline-none focus:border-brand-violet focus:ring-1 focus:ring-brand-violet transition-all"
+                className="w-full bg-surface border border-surface-border rounded-lg pl-3.5 pr-10 py-2 text-sm placeholder:text-muted focus:outline-none focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/10 transition-all"
                 required
               />
               <button
                 type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
               >
@@ -120,7 +123,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={inFlight}
-            className="w-full bg-brand-violet hover:bg-brand-violet-dark disabled:bg-brand-violet/60 text-white text-sm font-semibold py-2.5 rounded-lg transition-all shadow-sm hover:shadow-glow focus:outline-none cursor-pointer"
+            className="w-full bg-gradient-to-r from-brand-violet to-brand-violet-dark hover:from-brand-violet-dark hover:to-brand-violet disabled:opacity-60 text-white text-sm font-semibold py-2.5 rounded-lg transition-all shadow-glow hover:shadow-lg focus:outline-none cursor-pointer"
           >
             {inFlight ? 'Signing in...' : 'Sign In'}
           </button>

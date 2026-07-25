@@ -1,5 +1,5 @@
 /**
- * HireOS Evaluation Engine — Multi-Provider Orchestrator
+ * hiresprint Evaluation Engine — Multi-Provider Orchestrator
  *
  * Architecture (from the platform spec):
  *

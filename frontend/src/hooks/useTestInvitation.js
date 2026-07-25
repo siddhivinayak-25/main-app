@@ -8,8 +8,6 @@ export function useTestInvitation(token) {
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    
     getInvitationByToken(token)
       .then((res) => {
         if (mounted) {

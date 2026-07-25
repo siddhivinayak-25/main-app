@@ -1,5 +1,5 @@
 /**
- * HireOS LangGraph Evaluation Engine — powered by Gemini Flash
+ * hiresprint LangGraph Evaluation Engine — powered by Gemini Flash
  *
  * Multi-agent scoring pipeline (mirrors the architecture doc):
  *
@@ -323,7 +323,7 @@ async function synthesizeFinalScore(state) {
 
     const res = await llm.invoke([
       new SystemMessage(
-        `You are HireOS, an agentic hiring intelligence platform. Write a sharp, recruiter-facing 2-3 sentence overall assessment of this candidate. Be specific and actionable. Reference their actual behaviours, not just the numbers.`
+        `You are hiresprint, an agentic hiring intelligence platform. Write a sharp, recruiter-facing 2-3 sentence overall assessment of this candidate. Be specific and actionable. Reference their actual behaviours, not just the numbers.`
       ),
       new HumanMessage(`Composite Score: ${total}/100\n\nBreakdown:\n${breakdown}\n\nHighlights: ${highlights.join('; ') || 'none'}\nConcerns: ${concerns.join('; ') || 'none'}`),
     ]);

@@ -99,6 +99,15 @@ export default function InvitationsDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [inviteModalTestId, setInviteModalTestId] = useState(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    getInvitations()
+      .then(data => { if (!cancelled) setInvitations(data); })
+      .catch(e => { if (!cancelled) setError(e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   const load = useCallback(async () => {
     try {
       setLoading(true);
@@ -111,8 +120,6 @@ export default function InvitationsDashboard() {
       setLoading(false);
     }
   }, []);
-
-  useEffect(() => { load(); }, [load]);
 
   async function handleRevoke(id) {
     await revokeInvitation(id);
@@ -150,7 +157,7 @@ export default function InvitationsDashboard() {
         action={
           <button
             onClick={() => setInviteModalTestId('pick')}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-violet hover:bg-brand-violet-light text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-violet to-brand-violet-dark hover:from-brand-violet-dark hover:to-brand-violet text-white text-sm font-medium rounded-lg transition-all shadow-glow hover:shadow-lg"
           >
             <Send size={15} /> Send Invitation
           </button>
@@ -165,7 +172,7 @@ export default function InvitationsDashboard() {
           { label: 'In Progress', value: stats.started,   color: 'text-blue-400' },
           { label: 'Submitted',   value: stats.submitted, color: 'text-emerald-400' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-surface-card border border-surface-border rounded-2xl p-5 shadow-sm">
+          <div key={label} className="card-elevated p-5">
             <p className="text-sm text-muted mb-2">{label}</p>
             <span className={`text-2xl font-display font-semibold ${color}`}>{value}</span>
           </div>
@@ -203,7 +210,7 @@ export default function InvitationsDashboard() {
       </div>
 
       {/* Table */}
-      <div className="bg-surface-card border border-surface-border rounded-2xl overflow-hidden shadow-sm">
+      <div className="card-elevated overflow-hidden">
         {loading ? (
           <div className="p-6 space-y-3">
             {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-12" />)}

@@ -10,7 +10,7 @@ export default function ProtectedRoute() {
       <div className="flex items-center justify-center min-h-screen bg-surface">
         <div className="relative flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-brand-violet/20 border-t-brand-violet rounded-full animate-spin"></div>
-          <span className="text-sm font-medium text-muted animate-pulse">Loading HireOS...</span>
+          <span className="text-sm font-medium text-muted animate-pulse">Loading hiresprint...</span>
         </div>
       </div>
     );

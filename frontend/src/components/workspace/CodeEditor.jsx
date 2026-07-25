@@ -14,7 +14,7 @@ export default function CodeEditor({ value, onChange, language, filename, readOn
     editorRef.current = editor;
 
     // Custom theme matching our dark palette
-    monaco.editor.defineTheme('hireos-dark', {
+    monaco.editor.defineTheme('hiresprint-dark', {
       base: 'vs-dark',
       inherit: true,
       rules: [
@@ -36,7 +36,7 @@ export default function CodeEditor({ value, onChange, language, filename, readOn
         'editor.inactiveSelectionBackground': '#bd93f920',
       },
     });
-    monaco.editor.setTheme('hireos-dark');
+    monaco.editor.setTheme('hiresprint-dark');
 
     // Cmd/Ctrl+S → trigger save (handled by parent via onChange)
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {

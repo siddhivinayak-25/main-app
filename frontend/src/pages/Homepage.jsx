@@ -1,6 +1,7 @@
 import PublicNavbar from '../components/homepage/PublicNavbar';
 import Hero from '../components/homepage/Hero';
 import FeatureShowcase from '../components/homepage/FeatureShowcase';
+import FounderSection from '../components/homepage/FounderSection';
 import Footer from '../components/homepage/Footer';
 
 export default function Homepage() {
@@ -10,6 +11,7 @@ export default function Homepage() {
       <main className="flex-1">
         <Hero />
         <FeatureShowcase />
+        <FounderSection />
       </main>
       <Footer />
     </div>

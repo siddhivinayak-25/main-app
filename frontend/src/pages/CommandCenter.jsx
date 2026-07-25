@@ -35,7 +35,7 @@ export default function CommandCenter() {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-surface-card border border-surface-border rounded-2xl p-6 shadow-sm">
+        <div className="card-elevated p-6">
           <h2 className="font-display font-semibold text-ink mb-5">Hiring Funnel</h2>
           {loading ? (
             <div className="space-y-4">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-4" />)}</div>
@@ -50,7 +50,7 @@ export default function CommandCenter() {
           )}
         </div>
 
-        <div className="bg-surface-card border border-surface-border rounded-2xl p-6 shadow-sm">
+        <div className="card-elevated p-6">
           <h2 className="font-display font-semibold text-ink mb-5">Recent Active Tests</h2>
           {loading ? (
             <div className="space-y-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-8" />)}</div>
@@ -68,7 +68,7 @@ export default function CommandCenter() {
           )}
         </div>
 
-        <div className="bg-surface-card border border-surface-border rounded-2xl p-6 shadow-sm">
+        <div className="card-elevated p-6">
           <h2 className="font-display font-semibold text-ink mb-5">Top Performing Candidates</h2>
           {loading ? (
             <div className="space-y-4">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-6" />)}</div>

@@ -1,41 +1,43 @@
 import { Link } from 'react-router-dom';
-import { Search, ChevronDown, Sparkles } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
+import BrandLogo from '../brand/BrandLogo';
 
 export default function PublicNavbar() {
   const navItems = ['Product', 'Solutions', 'Resources', 'Pricing'];
 
   return (
-    <header className="sticky top-0 z-50 bg-surface-raised/90 backdrop-blur-md border-b border-surface-border transition-all">
+    <header className="sticky top-0 z-50 glass border-b border-surface-border/60 transition-all">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        
-        {/* Left: Logo */}
-        <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-brand-violet flex items-center justify-center text-white shadow-glow transition-transform group-hover:scale-105">
-              <Sparkles size={16} />
-            </div>
-            <span className="text-xl font-display font-bold text-ink">HireOS</span>
-          </Link>
 
-          {/* Center-left: Nav Items */}
-          <nav className="hidden md:flex items-center gap-6">
+        {/* Left: Logo + Nav */}
+        <div className="flex items-center gap-8">
+          <BrandLogo to="/" size="md" variant="dark" />
+
+          <nav className="hidden md:flex items-center gap-6" aria-label="Primary">
             {navItems.map((item) => (
-              <div key={item} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-ink cursor-pointer transition-colors group">
+              <button
+                key={item}
+                className="flex items-center gap-1 text-sm font-medium text-muted hover:text-ink transition-colors group bg-transparent border-none p-0 cursor-pointer"
+                onClick={() => { /* placeholder: open nav section */ }}
+              >
                 {item}
                 {item !== 'Pricing' && (
                   <ChevronDown size={14} className="text-muted/60 group-hover:text-ink transition-transform group-hover:translate-y-0.5" />
                 )}
-              </div>
+              </button>
             ))}
           </nav>
         </div>
 
         {/* Right: Search & Auth Actions */}
         <div className="flex items-center gap-5">
-          <button className="text-muted hover:text-ink p-1.5 rounded-full hover:bg-surface-hover transition-colors">
+          <button
+            aria-label="Search"
+            className="text-muted hover:text-ink p-1.5 rounded-full hover:bg-surface-hover transition-colors"
+          >
             <Search size={18} />
           </button>
-          
+
           <Link
             to="/login"
             className="text-sm font-semibold text-brand-violet hover:text-brand-violet-dark transition-colors"

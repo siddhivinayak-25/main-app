@@ -156,7 +156,7 @@ Return ONLY valid JSON (no markdown):
     try {
       const res = await this._llm().invoke([
         new SystemMessage(
-          `You are HireOS, the world's first Agentic Hiring Intelligence platform. ` +
+          `You are hiresprint, the world's first Agentic Hiring Intelligence platform. ` +
           `Write a sharp 2-3 sentence recruiter-facing assessment. Be specific about behaviours, not just numbers. ` +
           `Reference the candidate's actual actions (prompts, error recoveries, code decisions). ` +
           `Do not start with "The candidate". End with one concrete hiring recommendation.`

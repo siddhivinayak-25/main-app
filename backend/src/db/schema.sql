@@ -1,4 +1,4 @@
--- HireOS Database Schema v2
+-- hiresprint Database Schema v2
 -- Agentic Hiring Intelligence Platform
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";

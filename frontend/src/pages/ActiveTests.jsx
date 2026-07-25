@@ -30,14 +30,14 @@ export default function ActiveTests() {
         action={
           <button
             onClick={() => navigate('/dashboard/tests/new')}
-            className="flex items-center gap-2 bg-brand-violet hover:bg-brand-violet-dark text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-gradient-to-r from-brand-violet to-brand-violet-dark hover:from-brand-violet-dark hover:to-brand-violet text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-all shadow-glow hover:shadow-lg"
           >
             <Plus size={16} /> Create New Test
           </button>
         }
       />
 
-      <div className="bg-surface-card border border-surface-border rounded-2xl overflow-hidden shadow-sm">
+      <div className="card-elevated overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-surface-border">
           <div className="flex items-center gap-2">
             {tabs.map((t) => (

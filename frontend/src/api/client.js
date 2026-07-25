@@ -1,5 +1,5 @@
 /**
- * HireOS API Client
+ * hiresprint API Client
  * All requests go to /api (proxied to backend on port 3001 in dev).
  * Returns { data } on success, throws Error on failure.
  */

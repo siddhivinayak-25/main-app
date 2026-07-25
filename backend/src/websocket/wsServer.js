@@ -1,5 +1,5 @@
 /**
- * HireOS WebSocket Server
+ * hiresprint WebSocket Server
  *
  * Handles two WebSocket channels:
  *
@@ -48,7 +48,7 @@ function send(ws, type, payload) {
 // ─── Terminal Command Interpreter ─────────────────────────────────────────
 
 const HELP_TEXT = `
-HireOS Sandbox Terminal
+hiresprint Sandbox Terminal
 ─────────────────────────────────────────────
   run [filename]    Execute a file via Piston
   python main.py    Same as above (python)
@@ -258,7 +258,7 @@ export function attachWebSocketServer(httpServer) {
     if (channel === 'terminal') {
       // Send welcome banner
       send(ws, 'OUTPUT', {
-        text: `\x1b[36mHireOS Sandbox Terminal\x1b[0m — Powered by Piston (${sessionState.language})\r\nType 'help' for commands.\r\n$ `,
+        text: `\x1b[36mhiresprint Sandbox Terminal\x1b[0m — Powered by Piston (${sessionState.language})\r\nType 'help' for commands.\r\n$ `,
       });
 
       ws.on('message', async (raw) => {

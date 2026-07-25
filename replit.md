@@ -1,8 +1,8 @@
-# HireOS — Agentic Hiring Intelligence Platform
+# hiresprint — Agentic Hiring Intelligence Platform
 
 ## Project Overview
 
-HireOS is the world's first Agentic Hiring Intelligence platform. It evaluates how engineers collaborate with AI — candidates are dropped into a real sandboxed codebase and graded on orchestration quality, prompt efficiency, and AI recovery skills, not rote algorithm recall.
+hiresprint is the world's first Agentic Hiring Intelligence platform. It evaluates how engineers collaborate with AI — candidates are dropped into a real sandboxed codebase and graded on orchestration quality, prompt efficiency, and AI recovery skills, not rote algorithm recall.
 
 ### Current State
 - **Frontend only** (React 19 + Vite 8 + Tailwind CSS 4) — all data is mocked in `frontend/src/api/client.js`

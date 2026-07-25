@@ -1,5 +1,5 @@
 /**
- * CandidateWorkspace — Full IDE sandbox for HireOS test sessions
+ * CandidateWorkspace — Full IDE sandbox for hiresprint test sessions
  *
  * Layout (3-panel):
  * ┌──────────────────────────────────────────────────────────────┐
@@ -17,7 +17,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
 import { useTestInvitation } from '../hooks/useTestInvitation.js';
@@ -35,12 +35,56 @@ import SecurityMonitor  from '../components/workspace/SecurityMonitor.jsx';
 // ─── Default starter code per language ───────────────────────────────────
 
 const STARTER = {
-  python: `# Write your solution here\n# Use the AI panel on the left to generate code\n# Type 'run main.py' in the terminal below to execute\n\ndef main():\n    pass\n\nif __name__ == '__main__':\n    main()\n`,
-  javascript: `// Write your solution here\n// Type 'run main.js' in the terminal to execute\n\nfunction main() {\n  // your code here\n}\n\nmain();\n`,
-  typescript: `// Write your solution here\n\nfunction main(): void {\n  // your code here\n}\n\nmain();\n`,
-  java: `public class Main {\n    public static void main(String[] args) {\n        // your code here\n    }\n}\n`,
-  go: `package main\n\nimport "fmt"\n\nfunc main() {\n    // your code here\n    fmt.Println("Hello")\n}\n`,
-  cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // your code here\n    return 0;\n}\n`,
+  python: `# Write your solution here
+# Use the AI panel on the left to generate code
+# Type 'run main.py' in the terminal below to execute
+
+def main():
+    pass
+
+if __name__ == '__main__':
+    main()
+`,
+  javascript: `// Write your solution here
+// Type 'run main.js' in the terminal to execute
+
+function main() {
+  // your code here
+}
+
+main();
+`,
+  typescript: `// Write your solution here
+
+function main(): void {
+  // your code here
+}
+
+main();
+`,
+  java: `public class Main {
+    public static void main(String[] args) {
+        // your code here
+    }
+}
+`,
+  go: `package main
+
+import "fmt"
+
+func main() {
+    // your code here
+    fmt.Println("Hello")
+}
+`,
+  cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    // your code here
+    return 0;
+}
+`,
 };
 
 const EXT = { python:'py', javascript:'js', typescript:'ts', java:'java', go:'go', cpp:'cpp', rust:'rs' };
@@ -75,7 +119,6 @@ function useAutosave(token, files, delay = 8000) {
 // ─── Main Component ────────────────────────────────────────────────────────
 
 export default function CandidateWorkspace() {
-  const { testId }    = useParams();
   const [params]      = useSearchParams();
   const token         = params.get('token');
 
@@ -98,26 +141,62 @@ export default function CandidateWorkspace() {
   // Terminal ref (for file syncing)
   const terminalRef = useRef(null);
 
+  // Ref to submit function so the timer interval avoids stale closures
+  const handleSubmitRef = useRef(() => {});
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  async function handleSubmit() {
+    if (submitting || submitted || !sessionId) return;
+    if (!confirm('Submit your solution? You cannot make changes after submission.')) return;
+    setSubmitting(true);
+    clearInterval(timerRef.current);
+    try {
+      await sandboxService.submit({
+        sessionId,
+        candidateId: data.invitation.candidateId,
+        testId:      data.invitation.testId,
+        files,
+        invitationId: data.invitation.id,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      alert('Submission failed: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // Keep the ref current without triggering a render
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  });
+
   // ── Init session when invitation loads ──────────────────────────────────
   useEffect(() => {
     if (!data) return;
-    const { invitation, test } = data;
-    const lang = test?.language || 'python';
-    setLanguage(lang);
+    let mounted = true;
+    (async () => {
+      const { invitation, test } = data;
+      const lang = test?.language || 'python';
+      const fname = defaultFilename(lang);
+      const starterContent = test?.starterCode || STARTER[lang] || `# Write your solution here\n`;
 
-    // Initialize file system
-    const fname = defaultFilename(lang);
-    const starterContent = test?.starterCode || STARTER[lang] || `# Write your solution here\n`;
-    setFiles({ [fname]: { content: starterContent, language: lang } });
-    setActiveFile(fname);
+      let sid;
+      try {
+        sid = await startSession(invitation.candidateId, invitation.testId, invitation.id);
+      } catch (err) {
+        if (mounted) console.warn('Session start:', err.message);
+        return;
+      }
+      if (!mounted) return;
 
-    // Set timer from test config
-    if (test?.timeLimit) setTimeLeft(test.timeLimit * 60);
-
-    // Start evaluation session
-    startSession(invitation.candidateId, invitation.testId, invitation.id)
-      .then(sid => setSessionId(sid))
-      .catch(err => console.warn('Session start:', err.message));
+      setLanguage(lang);
+      setFiles({ [fname]: { content: starterContent, language: lang } });
+      setActiveFile(fname);
+      setTimeLeft((test?.timeLimit || 90) * 60);
+      setSessionId(sid);
+    })();
+    return () => { mounted = false; };
   }, [data]);
 
   // ── Timer countdown ──────────────────────────────────────────────────────
@@ -125,7 +204,7 @@ export default function CandidateWorkspace() {
     if (!data || submitted) return;
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
-        if (t <= 0) { handleSubmit(); return 0; }
+        if (t <= 0) { handleSubmitRef.current(); return 0; }
         return t - 1;
       });
     }, 1000);
@@ -181,30 +260,8 @@ export default function CandidateWorkspace() {
   }
 
   // ── Test results ─────────────────────────────────────────────────────────
-  function handleTestResults(results, passed, total) {
+  function handleTestResults(results) {
     setTestResults(results);
-  }
-
-  // ── Submit ────────────────────────────────────────────────────────────────
-  async function handleSubmit() {
-    if (submitting || submitted || !sessionId) return;
-    if (!confirm('Submit your solution? You cannot make changes after submission.')) return;
-    setSubmitting(true);
-    clearInterval(timerRef.current);
-    try {
-      await sandboxService.submit({
-        sessionId,
-        candidateId: data.invitation.candidateId,
-        testId:      data.invitation.testId,
-        files,
-        invitationId: data.invitation.id,
-      });
-      setSubmitted(true);
-    } catch (err) {
-      alert('Submission failed: ' + err.message);
-    } finally {
-      setSubmitting(false);
-    }
   }
 
   // ── Guards ─────────────────────────────────────────────────────────────────
@@ -252,11 +309,11 @@ export default function CandidateWorkspace() {
           </div>
           <h2 className="text-white text-2xl font-bold">Submitted!</h2>
           <p className="text-white/50 text-sm leading-relaxed">
-            Your solution is being evaluated by the HireOS AI engine across 5 dimensions.
+            Your solution is being evaluated by the hiresprint AI engine across 5 dimensions.
             The recruiter will be notified with your results.
           </p>
           <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-left space-y-2">
-            <p className="text-white/40 text-xs uppercase tracking-wider">What's being scored</p>
+            <p className="text-white/40 text-xs uppercase tracking-wider">What&apos;s being scored</p>
             {['Prompt Quality', 'Error Recovery', 'Output Correctness', 'Code Quality', 'Execution Efficiency'].map(d => (
               <div key={d} className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-brand-violet" />
@@ -276,7 +333,7 @@ export default function CandidateWorkspace() {
     <div className="flex flex-col h-screen bg-[#0a0a14] overflow-hidden select-none">
       {/* ── Header ── */}
       <WorkspaceHeader
-        testName={test?.name || 'HireOS Test'}
+        testName={test?.name || 'hiresprint Test'}
         timeLeft={timeLeft}
         securityScore={secScore}
         onSubmit={handleSubmit}
