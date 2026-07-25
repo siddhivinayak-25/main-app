@@ -12,6 +12,67 @@ Traditional technical interviews reward algorithm memorization. Modern engineeri
 
 ---
 
+## Inspiration
+
+We kept seeing the same gap in technical hiring: interviews ask candidates to write functions from scratch in isolation, but day-to-day engineering now happens with AI pair programmers, sandboxed runtimes, and cloud-based tooling. The best engineers are not the ones who memorize syntax—they are the ones who can describe a problem clearly, recover when an AI model hallucinates, and keep a secure, productive workflow under pressure. We built hiresprint to make that real-world collaboration measurable.
+
+## What it does
+
+hiresprint is an end-to-end agentic hiring platform.
+
+- Recruiters build custom technical assessments through a multi-step wizard.
+- Each assessment defines a rubric, test cases, starter code, and a time limit.
+- Candidates receive a unique invitation link and enter a browser-based IDE.
+- Inside the workspace, candidates write code in Monaco, run it in a real terminal via xterm.js, and collaborate with an AI assistant panel.
+- All execution is sandboxed through the Piston API.
+- Security telemetry captures tab switching, focus loss, copy/paste events, and other integrity signals.
+- A LangChain + Gemini 2.5 Flash engine scores the session across correctness, efficiency, prompt quality, error recovery, and code quality.
+- Recruiters receive a structured report with scores, qualitative feedback, and security observations.
+
+## How we built it
+
+- **Frontend:** React 19, Vite 8, React Router 7, Tailwind CSS 4, Monaco Editor, xterm.js, Recharts, and Lucide React.
+- **Backend:** Node.js, Express, PostgreSQL, JWT authentication, and the `ws` library for real-time terminal sessions.
+- **AI Engine:** LangChain orchestrating Gemini 2.5 Flash for qualitative scoring and deterministic scorers for test-case validation.
+- **Sandbox:** Piston API for isolated, multi-language code execution.
+- **Security:** A frontend security monitor and backend logging pipeline for integrity events.
+- **Design:** A light, professional UI with a custom SVG/text brand mark, topographic background, and founder section.
+
+## Challenges we ran into
+
+- **Real-time terminal synchronization:** Keeping xterm.js, the backend WebSocket, and Piston execution state in sync without losing candidate input or output.
+- **Sandboxing without Docker:** Replit does not support containerization, so we used the Piston API to execute candidate code safely across languages.
+- **LLM scoring consistency:** Designing a weighted rubric, confidence floor, and security penalty model that produces stable, explainable scores.
+- **Secure but non-intrusive monitoring:** Capturing enough integrity signal to flag cheating without degrading the candidate experience.
+- **Authentication for live sessions:** Ensuring invitation tokens are validated before WebSocket connections are accepted, with hard-close behavior on invalid tokens.
+
+## Accomplishments that we're proud of
+
+- A working, full-stack product with real AI evaluation and real sandboxed code execution—no mocks.
+- A custom-built brand identity using only code (SVG/text logo) and a consistent light, gradient-heavy design system.
+- A multi-dimensional scoring engine that combines deterministic correctness with LLM-driven qualitative assessment.
+- End-to-end security telemetry that gives recruiters visibility without surveillance-level friction.
+- A clean recruiter dashboard, test builder wizard, candidate pipeline, and AI-augmented workspace built from scratch.
+
+## What we learned
+
+- **AI evaluation needs structure.** Raw LLM scores are too noisy. Combining them with deterministic test cases and a weighted rubric makes results trustworthy.
+- **Real-time systems are hard to debug.** Terminal sessions require careful connection lifecycle management, reconnection handling, and clean resource disposal.
+- **Design is a product signal.** A consistent, professional UI builds recruiter confidence as much as the underlying engine does.
+- **Schema migrations must be idempotent.** Using `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` keeps boot-time setup safe and repeatable.
+- **Git workflows matter.** Keeping feature branches clean and pushing through Replit’s git tooling avoids the token-auth friction of raw shell pushes.
+
+## What's next for hiresprint
+
+- Candidate welcome and landing page before entering a test.
+- Recruiter session replay of candidate workspace activity.
+- Detailed evaluation results page with full rubric breakdown.
+- Email invitation delivery with magic links.
+- OpenAI provider registration alongside Gemini.
+- Admin oversight and role management.
+
+---
+
 ## Why
 
 - **AI is now a teammate.** Hiring should measure how candidates use it, not ignore it.
