@@ -2,37 +2,47 @@
 
 ## Project Overview
 
-hiresprint is the world's first Agentic Hiring Intelligence platform. It evaluates how engineers collaborate with AI — candidates are dropped into a real sandboxed codebase and graded on orchestration quality, prompt efficiency, and AI recovery skills, not rote algorithm recall.
+hiresprint is an Agentic Hiring Intelligence platform. It evaluates how engineers collaborate with AI — candidates are dropped into a real sandboxed codebase and graded on orchestration quality, prompt efficiency, and AI recovery skills, not rote algorithm recall.
 
 ### Current State
-- **Frontend only** (React 19 + Vite 8 + Tailwind CSS 4) — all data is mocked in `frontend/src/api/client.js`
-- No backend yet — the core backend engine (sandbox, LangGraph evaluator, REST API) is the next major build phase
+- **Full stack live**: React + Vite frontend, Node.js + Express backend, Replit PostgreSQL, real Piston code execution, and a Gemini 2.5 Flash evaluation engine.
+- Recruiter dashboard, test builder, invitation flow, candidate workspace, and candidate pipeline are all functional.
+- Founder: Siddhivinayak Waghmode, COEP Technological University, BTech in Manufacturing Science & Technology.
 
 ### Stack
 - **Frontend**: React 19, React Router 7, Vite 8, Tailwind CSS 4, Recharts, Lucide
-- **Backend (planned)**: Node.js or Python API, LangGraph evaluation engine, sandboxed code execution
+- **Backend**: Node.js, Express, JWT auth, PostgreSQL, WebSocket (`ws`), LangChain + Gemini 2.5 Flash
+- **Sandbox**: Piston API for isolated code execution (84 languages)
+- **Editor / Terminal**: Monaco Editor, xterm.js
 
 ## How to Run
 
-The dev server starts automatically via the **Start application** workflow:
-```
-cd frontend && npm run dev
-```
-Runs on port 5000. Hot-reload is enabled.
+Two workflows are configured:
+- **Start application**: `cd frontend && npm run dev` (port 5000)
+- **Start Backend**: `cd backend && npm run dev` (port 3001)
 
 ## Project Structure
 
 ```
 frontend/
   src/
-    api/          # API layer (currently mock; swap client.js for real fetch to connect backend)
-    components/   # Reusable UI components (auth, candidate, layout, ui)
+    api/          # API clients (client.js, authService, testsService, etc.)
+    components/   # Reusable UI components (auth, candidate, layout, ui, brand, visual)
     pages/        # Route-level pages
-  public/         # Static assets
+    hooks/        # Data fetching hooks
+  public/         # Static assets (brand logos, topographic canvas image)
+
+backend/
+  src/
+    db/           # PostgreSQL schema and pool
+    routes/       # REST API routes
+    evaluation/   # LangChain/Gemini evaluation engine
+    websocket/    # WebSocket server for candidate terminal
 ```
 
 ## User Preferences
 
-- Build the core backend engine as the top priority (sandbox + LangGraph evaluator + REST API)
-- Frontend user journeys are mostly complete — backend will drive UI changes
-- Goal: world-first Hiring Intelligence platform ready for 2040 recruitment
+- Keep the light theme as the primary brand feel.
+- Brand wordmark uses lowercase Inter, "hire" in purple and "sprint" in black.
+- Founder section must stay on the landing page with LinkedIn, GitHub, and email links.
+- No contact form on the landing page.

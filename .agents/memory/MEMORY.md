@@ -1,3 +1,4 @@
 - [Schema migration pattern](schema-migration.md) — ALTER TABLE IF NOT EXISTS in schema.sql for idempotent column additions on every boot
 - [GitHub push auth](github-push-auth.md) — gitPush callback failed with NO_CREDENTIALS; user must reconnect GitHub account in Replit account settings
 - [Test builder form shape](test-builder-form.md) — wizard formData keys and how createTest() maps them to the API payload
+- [Brand rebrand to hiresprint](brand-rebrand.md) — uploaded assets, BrandLogo component, and FounderSection requirements
