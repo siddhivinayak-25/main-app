@@ -1,4 +1,5 @@
-import { X } from 'lucide-react';
+import { X, PlayCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import ScoreRing from '../ui/ScoreRing';
 import StageActionMenu from './StageActionMenu';
 import ActivityTimeline from './ActivityTimeline';
@@ -11,6 +12,7 @@ const breakdownLabels = {
 };
 
 export default function CandidateDrawer({ candidate, onClose, onStatusUpdated }) {
+  const navigate = useNavigate();
   const { scoreBreakdown: sb, testDetails: td } = candidate;
 
   return (
@@ -90,11 +92,16 @@ export default function CandidateDrawer({ candidate, onClose, onStatusUpdated })
             <ActivityTimeline activityLog={candidate.activityLog} />
           </div>
 
-          <button className="w-full bg-brand-violet hover:bg-brand-violet-dark text-white font-medium py-3 rounded-lg transition-colors shadow-sm">
-            View Full Replay
+          {/* Session Replay CTA */}
+          <button
+            onClick={() => { onClose(); navigate(`/replay/${candidate.id}`); }}
+            className="w-full flex items-center justify-center gap-2 bg-brand-violet hover:bg-brand-violet-dark text-white font-medium py-3 rounded-xl transition-all shadow-glow hover:shadow-lg"
+          >
+            <PlayCircle size={17} />
+            View Session Replay
           </button>
         </div>
       </div>
     </div>
   );
-}
+}
