@@ -71,7 +71,7 @@ function RowActions({ invitation, onRevoke, onResend }) {
   const [loading, setLoading] = useState(null);
   const canResend  = ['pending', 'expired', 'revoked'].includes(invitation.status);
   const canRevoke  = ['pending', 'started'].includes(invitation.status);
-  const testLink   = `/test/${invitation.testId}?token=${invitation.invitationToken}`;
+  const testLink   = `/welcome/${invitation.testId}?token=${invitation.invitationToken}`;
   const fullLink   = `${window.location.origin}${testLink}`;
 
   async function handleRevoke() {

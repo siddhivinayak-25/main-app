@@ -124,7 +124,7 @@ router.post('/', async (req, res, next) => {
     );
 
     const inv = invResult.rows[0];
-    const publicLink = `${process.env.REPLIT_DEV_DOMAIN || ''}/test/${testId}?token=${inv.invitation_token}`;
+    const publicLink = `${process.env.REPLIT_DEV_DOMAIN || ''}/welcome/${testId}?token=${inv.invitation_token}`;
 
     const emailResult = await sendInvitationEmail({
       invitationId: inv.id,
@@ -196,7 +196,7 @@ router.post('/:id/resend', async (req, res, next) => {
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Invitation not found or already submitted' });
     const row = result.rows[0];
-    const publicLink = `${process.env.REPLIT_DEV_DOMAIN || ''}/test/${row.test_id}?token=${row.invitation_token}`;
+    const publicLink = `${process.env.REPLIT_DEV_DOMAIN || ''}/welcome/${row.test_id}?token=${row.invitation_token}`;
 
     const emailResult = await sendInvitationEmail({
       invitationId: row.id,

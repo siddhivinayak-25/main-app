@@ -13,13 +13,15 @@ import CandidatePipeline from './pages/CandidatePipeline';
 import ComingSoon from './pages/ComingSoon';
 import Profile from './pages/Profile';
 import CandidateWorkspace from './pages/CandidateWorkspace';
+import CandidateWelcome from './pages/CandidateWelcome';
 import InvitationsDashboard from './pages/InvitationsDashboard';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ── Candidate Test Workspace (public, invite-token gated) ── */}
+        {/* ── Candidate Welcome + Workspace (public, invite-token gated) ── */}
+        <Route path="/welcome/:testId" element={<CandidateWelcome />} />
         <Route path="/test/:testId" element={<CandidateWorkspace />} />
 
         {/* ── Public ── */}
