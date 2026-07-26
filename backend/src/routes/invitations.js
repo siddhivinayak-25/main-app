@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db/index.js';
 import { authenticate } from '../middleware/auth.js';
+import { sendInvitationEmail } from '../services/emailService.js';
 
 const router = Router();
 
@@ -125,11 +126,22 @@ router.post('/', async (req, res, next) => {
     const inv = invResult.rows[0];
     const publicLink = `${process.env.REPLIT_DEV_DOMAIN || ''}/test/${testId}?token=${inv.invitation_token}`;
 
+    const emailResult = await sendInvitationEmail({
+      invitationId: inv.id,
+      candidateEmail,
+      candidateName,
+      testName: test.name,
+      publicLink,
+      isResend: false,
+    });
+
     res.status(201).json({
       invitationToken: inv.invitation_token,
       publicLink,
       expiresAt: inv.expires_at,
       candidateId,
+      emailStatus: emailResult.ok ? 'sent' : (emailResult.fallback ? 'not_configured' : 'failed'),
+      emailError: emailResult.error || null,
     });
   } catch (err) { next(err); }
 });
@@ -179,13 +191,29 @@ router.post('/:id/resend', async (req, res, next) => {
        FROM tests t
        WHERE i.id = $1 AND i.test_id = t.id AND t.recruiter_id = $2
          AND i.status NOT IN ('submitted')
-       RETURNING i.id, i.invitation_token, i.test_id, i.expires_at`,
+       RETURNING i.id, i.invitation_token, i.test_id, i.expires_at, i.candidate_email, i.candidate_name, t.name AS test_name`,
       [req.params.id, req.user.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Invitation not found or already submitted' });
     const row = result.rows[0];
     const publicLink = `${process.env.REPLIT_DEV_DOMAIN || ''}/test/${row.test_id}?token=${row.invitation_token}`;
-    res.json({ ok: true, publicLink, expiresAt: row.expires_at });
+
+    const emailResult = await sendInvitationEmail({
+      invitationId: row.id,
+      candidateEmail: row.candidate_email,
+      candidateName: row.candidate_name,
+      testName: row.test_name,
+      publicLink,
+      isResend: true,
+    });
+
+    res.json({
+      ok: true,
+      publicLink,
+      expiresAt: row.expires_at,
+      emailStatus: emailResult.ok ? 'sent' : (emailResult.fallback ? 'not_configured' : 'failed'),
+      emailError: emailResult.error || null,
+    });
   } catch (err) { next(err); }
 });
 
@@ -205,6 +233,9 @@ function formatInvitation(i) {
     testName: i.test_name,
     testRole: i.test_role,
     candidateScore: i.candidate_score,
+    emailStatus: i.email_status,
+    emailProviderId: i.email_provider_id,
+    emailSentAt: i.email_sent_at,
   };
 }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Modal from '../ui/Modal';
 import { sendInvitation } from '../../api/invitationService';
-import { Copy, CheckCircle2, Loader2, Send } from 'lucide-react';
+import { Copy, CheckCircle2, Loader2, Send, Mail, AlertTriangle } from 'lucide-react';
 
 export default function InviteCandidateModal({ isOpen, onClose, testId }) {
   const [email, setEmail] = useState('');
@@ -63,12 +63,24 @@ export default function InviteCandidateModal({ isOpen, onClose, testId }) {
       {successData ? (
         <div className="space-y-6 animate-fade-in">
           <div className="flex flex-col items-center justify-center text-center space-y-3 py-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-2">
-              <CheckCircle2 size={24} />
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
+              successData.emailStatus === 'sent'
+                ? 'bg-emerald-500/10 text-emerald-400'
+                : successData.emailStatus === 'failed'
+                ? 'bg-red-500/10 text-red-400'
+                : 'bg-amber-500/10 text-amber-400'
+            }`}>
+              {successData.emailStatus === 'sent' ? <CheckCircle2 size={24} /> : successData.emailStatus === 'failed' ? <AlertTriangle size={24} /> : <Mail size={24} />}
             </div>
-            <h4 className="text-lg font-medium text-white">Invitation Sent!</h4>
+            <h4 className="text-lg font-medium text-white">
+              {successData.emailStatus === 'sent' ? 'Invitation Sent!' : successData.emailStatus === 'failed' ? 'Email Failed' : 'Invitation Created'}
+            </h4>
             <p className="text-sm text-muted">
-              We've emailed the unique test link to <span className="text-white font-medium">{successData.email}</span>.
+              {successData.emailStatus === 'sent'
+                ? <>We've emailed the unique test link to <span className="text-white font-medium">{successData.email}</span>.</>
+                : successData.emailStatus === 'failed'
+                ? <>We couldn't email the link. You can still share the link below manually. <span className="text-white font-medium">{successData.emailError}</span></>
+                : <>Email delivery is not configured. Share the link below manually with <span className="text-white font-medium">{successData.email}</span>.</>}
             </p>
           </div>
 

@@ -145,6 +145,10 @@ ALTER TABLE evaluation_sessions ADD COLUMN IF NOT EXISTS rubric_version   VARCHA
 
 ALTER TABLE candidates ADD COLUMN IF NOT EXISTS security_flags JSONB DEFAULT '{}';
 
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS email_status VARCHAR(50) DEFAULT 'not_configured';
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS email_provider_id TEXT;
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS email_sent_at TIMESTAMPTZ;
+
 -- ─── Indexes ───────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_tests_recruiter       ON tests(recruiter_id);
 CREATE INDEX IF NOT EXISTS idx_candidates_test       ON candidates(test_id);

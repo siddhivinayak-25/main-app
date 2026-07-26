@@ -4,6 +4,7 @@ import {
   Send, Copy, CheckCircle2, RefreshCw, XCircle,
   ChevronDown, Search, ExternalLink, Loader2,
   Clock, CheckCheck, AlertTriangle, Ban,
+  Mail,
 } from 'lucide-react';
 import { getInvitations, revokeInvitation, resendInvitation } from '../api/invitationService';
 import PageHeader from '../components/layout/PageHeader';
@@ -22,6 +23,24 @@ const STATUS_CONFIG = {
 
 function StatusChip({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+  const Icon = cfg.icon;
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+      <Icon size={11} />
+      {cfg.label}
+    </span>
+  );
+}
+
+/* ── Email status chip ─────────────────────────────────────── */
+const EMAIL_STATUS_CONFIG = {
+  sent:           { label: 'Sent',          icon: CheckCircle2, bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  failed:         { label: 'Failed',        icon: AlertTriangle,  bg: 'bg-red-500/10',     text: 'text-red-400',     border: 'border-red-500/20'   },
+  not_configured: { label: 'Not configured', icon: Mail,           bg: 'bg-amber-500/10',   text: 'text-amber-400',   border: 'border-amber-500/20' },
+};
+
+function EmailStatusChip({ status }) {
+  const cfg = EMAIL_STATUS_CONFIG[status] || EMAIL_STATUS_CONFIG.not_configured;
   const Icon = cfg.icon;
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
@@ -226,7 +245,7 @@ export default function InvitationsDashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-surface-border">
-                {['Candidate', 'Test', 'Status', 'Sent', 'Expires', 'Score', ''].map((h) => (
+                {['Candidate', 'Test', 'Status', 'Email', 'Sent', 'Expires', 'Score', ''].map((h) => (
                   <th key={h} className="text-left text-xs font-medium text-muted px-5 py-3 first:pl-6 last:pr-6">
                     {h}
                   </th>
@@ -254,6 +273,10 @@ export default function InvitationsDashboard() {
                   {/* Status */}
                   <td className="px-5 py-3">
                     <StatusChip status={inv.status} />
+                  </td>
+                  {/* Email */}
+                  <td className="px-5 py-3">
+                    <EmailStatusChip status={inv.emailStatus} />
                   </td>
                   {/* Sent */}
                   <td className="px-5 py-3 text-xs text-muted">
