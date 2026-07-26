@@ -16,6 +16,9 @@ import CandidateWorkspace from './pages/CandidateWorkspace';
 import CandidateWelcome from './pages/CandidateWelcome';
 import InvitationsDashboard from './pages/InvitationsDashboard';
 import SessionReplay from './pages/SessionReplay';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 
 export default function App() {
   return (
@@ -30,6 +33,12 @@ export default function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+        </Route>
+
+        {/* ── Admin ── */}
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route element={<AdminProtectedRoute />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Route>
 
         {/* ── Session Replay (protected, full-screen) ── */}

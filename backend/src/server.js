@@ -23,6 +23,7 @@ import evaluationRoutes from './routes/evaluation.js';
 import sandboxRoutes    from './routes/sandbox.js';
 import securityRoutes   from './routes/security.js';
 import sessionRoutes    from './routes/sessions.js';
+import adminRoutes      from './routes/admin.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3001;
@@ -67,6 +68,7 @@ app.use('/api/evaluation', evaluationRoutes);
 app.use('/api/sandbox',    sandboxRoutes);
 app.use('/api/security',   securityRoutes);
 app.use('/api/sessions',   sessionRoutes);
+app.use('/api/admin',      adminRoutes);
 
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use('/api/*', (_req, res) => res.status(404).json({ error: 'Route not found' }));

@@ -6,6 +6,8 @@
 
 const BASE = '/api';
 
+let adminToken = null;
+
 function getToken() {
   // AuthContext stores auth as JSON under 'auth' key
   try {
@@ -15,12 +17,25 @@ function getToken() {
   return null;
 }
 
+function getAdminToken() {
+  if (adminToken) return adminToken;
+  try {
+    const auth = localStorage.getItem('adminAuth');
+    if (auth) return JSON.parse(auth).token;
+  } catch {}
+  return null;
+}
+
 export function setToken(token) {
   // No-op: AuthContext manages the 'auth' key directly
 }
 
+export function setAdminToken(token) {
+  adminToken = token;
+}
+
 export async function request(method, path, body) {
-  const token = getToken();
+  const token = path.startsWith('/admin') ? getAdminToken() : getToken();
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers: {
