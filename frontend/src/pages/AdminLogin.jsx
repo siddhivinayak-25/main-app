@@ -68,7 +68,6 @@ export default function AdminLogin() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="sv2542004"
               disabled={inFlight}
               className="w-full bg-surface border border-surface-border rounded-lg px-3.5 py-2 text-sm placeholder:text-muted focus:outline-none focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/10 transition-all"
               required
@@ -82,7 +81,7 @@ export default function AdminLogin() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+  
                 disabled={inFlight}
                 className="w-full bg-surface border border-surface-border rounded-lg pl-3.5 pr-10 py-2 text-sm placeholder:text-muted focus:outline-none focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/10 transition-all"
                 required
@@ -104,7 +103,6 @@ export default function AdminLogin() {
               type="text"
               value={favoritePerson}
               onChange={(e) => setFavoritePerson(e.target.value)}
-              placeholder="kranti"
               disabled={inFlight}
               className="w-full bg-surface border border-surface-border rounded-lg px-3.5 py-2 text-sm placeholder:text-muted focus:outline-none focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/10 transition-all"
               required
@@ -117,7 +115,6 @@ export default function AdminLogin() {
               type="number"
               value={favoriteNumber}
               onChange={(e) => setFavoriteNumber(e.target.value)}
-              placeholder="134"
               disabled={inFlight}
               className="w-full bg-surface border border-surface-border rounded-lg px-3.5 py-2 text-sm placeholder:text-muted focus:outline-none focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/10 transition-all"
               required
