@@ -63,14 +63,24 @@ export async function sendInvitationEmail({
 }
 
 async function trackEmailStatus(invitationId, status, providerId) {
-  await query(
-    `UPDATE invitations
-     SET email_status = $2,
-         email_provider_id = $3,
-         email_sent_at = CASE WHEN $2 = 'sent' THEN NOW() ELSE email_sent_at END
-     WHERE id = $1`,
-    [invitationId, status, providerId]
-  );
+  if (status === 'sent') {
+    await query(
+      `UPDATE invitations
+       SET email_status = $2,
+           email_provider_id = $3,
+           email_sent_at = NOW()
+       WHERE id = $1`,
+      [invitationId, status, providerId]
+    );
+  } else {
+    await query(
+      `UPDATE invitations
+       SET email_status = $2,
+           email_provider_id = $3
+       WHERE id = $1`,
+      [invitationId, status, providerId]
+    );
+  }
 }
 
 function buildInvitationHtml({ candidateName, testName, publicLink, isResend }) {
